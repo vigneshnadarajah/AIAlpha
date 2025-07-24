@@ -18,11 +18,11 @@ export const errorHandler = (
   error: Error | AppError | ZodError,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): void => {
   let statusCode = 500;
   let message = 'Internal Server Error';
-  let details: unknown = undefined;
+  let details: unknown;
 
   // Handle Zod validation errors
   if (error instanceof ZodError) {
@@ -59,10 +59,18 @@ export const errorHandler = (
   });
 
   // Send error response
-  res.status(statusCode).json({
+  const response: Record<string, unknown> = {
     success: false,
     message,
-    ...(details && { details }),
-    ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
-  });
+  };
+
+  if (details) {
+    response['details'] = details;
+  }
+
+  if (process.env['NODE_ENV'] === 'development') {
+    response['stack'] = error.stack;
+  }
+
+  res.status(statusCode).json(response);
 };

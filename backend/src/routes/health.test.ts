@@ -16,7 +16,7 @@ describe('Health Router', () => {
         success: true,
         message: 'AIAlpha Backend is healthy',
         timestamp: expect.any(String),
-        environment: process.env.NODE_ENV,
+        environment: process.env['NODE_ENV'],
       });
     });
 

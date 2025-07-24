@@ -20,6 +20,45 @@ AIAlpha: Multi-tenant SaaS Data Visualization Platform (React/TypeScript, Node.j
 - `frontend/` - React app (port 5173)  
 - `shared/` - Shared TypeScript types
 
+## 🚨 CRITICAL: Test-Driven Development (TDD) Methodology
+
+**MANDATORY PROCESS - NO EXCEPTIONS:**
+
+### Red-Green-Refactor Cycle
+1. **🔴 RED:** Write failing test FIRST - before any implementation
+2. **🟢 GREEN:** Write minimal code to make test pass
+3. **🔄 REFACTOR:** Improve code while keeping tests green
+4. **REPEAT:** Add more tests following same cycle
+
+### TDD Rules (STRICTLY ENFORCED)
+- **NEVER write implementation before tests**
+- **ALWAYS start with failing test**
+- **Write minimal code to pass tests**
+- **Refactor only with green tests**
+- **Achieve 85%+ coverage naturally**
+
+### Example TDD Workflow
+```bash
+# 1. Write failing test
+npm test -- --testPathPattern="feature.test.ts"  # Should FAIL
+
+# 2. Write minimal implementation
+npm test -- --testPathPattern="feature.test.ts"  # Should PASS
+
+# 3. Refactor and verify
+npm test -- --testPathPattern="feature.test.ts"  # Should STILL PASS
+
+# 4. Check coverage
+npm test -- --coverage --testPathPattern="feature.test.ts"
+```
+
+### TDD Benefits Realized
+- **Better Design:** Tests drive API contracts
+- **Higher Coverage:** Natural 90%+ coverage without forcing
+- **Fewer Bugs:** Comprehensive edge case testing
+- **Easier Refactoring:** Safety net of tests
+- **Living Documentation:** Tests describe expected behavior
+
 ## Code Style Guidelines
 - **Language:** TypeScript strict mode, Zod validation
 - **Imports:** Absolute paths (@/components), group external/internal/relative
@@ -33,3 +72,10 @@ AIAlpha: Multi-tenant SaaS Data Visualization Platform (React/TypeScript, Node.j
 - **Multi-tenancy:** Schema-per-tenant isolation, qualify all DB queries with `"${tenantSchema}".table`
 - **Validation:** Zod on all inputs, strict LLM-generated SQL validation
 - **Auth:** Supabase Auth JWT validation in Express middleware
+
+## Development Quality Gates
+- **Phase Gate 1:** All tests must pass before proceeding
+- **Phase Gate 2:** 85%+ test coverage required
+- **Phase Gate 3:** TypeScript strict mode compliance
+- **Phase Gate 4:** ESLint and Prettier compliance
+- **Phase Gate 5:** Security validation (tenant isolation, input validation)

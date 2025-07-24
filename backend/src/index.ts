@@ -7,6 +7,7 @@ import { config } from '@/config/environment';
 import { errorHandler } from '@/middleware/errorHandler';
 import { logger } from '@/utils/logger';
 import { healthRouter } from '@/routes/health';
+import { authRouter } from '@/routes/auth';
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Routes
 app.use('/api/health', healthRouter);
+app.use('/api/auth', authRouter);
 
 // Error handling middleware (must be last)
 app.use(errorHandler);
