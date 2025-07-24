@@ -1,76 +1,56 @@
 import { Request, Response, NextFunction } from 'express';
-import { ZodError } from 'zod';
-import { logger } from '@/utils/logger';
+import { CustomError, isCustomError } from '../utils/errors';
+import { ApiResponse } from '../types';
 
-export interface AppError extends Error {
-  statusCode?: number;
-  isOperational?: boolean;
+interface ZodError extends Error {
+  name: 'ZodError';
+  errors: Array<{
+    path: (string | number)[];
+    message: string;
+  }>;
 }
 
-export const createError = (message: string, statusCode: number): AppError => {
-  const error: AppError = new Error(message);
-  error.statusCode = statusCode;
-  error.isOperational = true;
-  return error;
+const isZodError = (error: any): error is ZodError => {
+  return error.name === 'ZodError' && Array.isArray(error.errors);
 };
 
 export const errorHandler = (
-  error: Error | AppError | ZodError,
-  req: Request,
+  error: Error | CustomError,
+  _req: Request,
   res: Response,
   _next: NextFunction
 ): void => {
-  let statusCode = 500;
-  let message = 'Internal Server Error';
-  let details: unknown;
-
   // Handle Zod validation errors
-  if (error instanceof ZodError) {
-    statusCode = 400;
-    message = 'Validation Error';
-    details = error.errors.map(err => ({
-      field: err.path.join('.'),
-      message: err.message,
-    }));
-  }
-  // Handle custom app errors
-  else if ('statusCode' in error && error.statusCode) {
-    statusCode = error.statusCode;
-    message = error.message;
-  }
-  // Handle known errors
-  else if (error.name === 'UnauthorizedError') {
-    statusCode = 401;
-    message = 'Unauthorized';
-  }
-  else if (error.name === 'ValidationError') {
-    statusCode = 400;
-    message = error.message;
+  if (isZodError(error)) {
+    const response: ApiResponse = {
+      success: false,
+      message: 'Validation failed',
+      statusCode: 400,
+      errors: error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
+    };
+    
+    res.status(400).json(response);
+    return;
   }
 
-  // Log error
-  logger.error('Error occurred:', {
-    message: error.message,
-    stack: error.stack,
-    statusCode,
-    url: req.url,
-    method: req.method,
-    ip: req.ip,
-  });
+  // Handle custom errors
+  if (isCustomError(error)) {
+    const response: ApiResponse = {
+      success: false,
+      message: error.message,
+      statusCode: error.statusCode
+    };
+    
+    res.status(error.statusCode).json(response);
+    return;
+  }
 
-  // Send error response
-  const response: Record<string, unknown> = {
+  // Handle generic errors
+  const response: ApiResponse = {
     success: false,
-    message,
+    message: 'Internal server error',
+    statusCode: 500
   };
-
-  if (details) {
-    response['details'] = details;
-  }
-
-  if (process.env['NODE_ENV'] === 'development') {
-    response['stack'] = error.stack;
-  }
-
-  res.status(statusCode).json(response);
+  
+  res.status(500).json(response);
 };

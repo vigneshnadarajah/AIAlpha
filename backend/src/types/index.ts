@@ -1,27 +1,26 @@
-export interface ApiResponse<T = unknown> {
+export interface ApiResponse<T = any> {
   success: boolean;
   message: string;
   data?: T;
   errors?: string[];
-}
-
-export interface PaginatedResponse<T> extends ApiResponse<T[]> {
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
+  statusCode?: number;
 }
 
 export interface UserContext {
   userId: string;
+  email: string;
   tenantId: string;
   tenantSchema: string;
-  email: string;
-  role: string;
+  role: 'admin' | 'user';
 }
 
+export interface HealthStatus {
+  status: 'healthy' | 'unhealthy';
+  timestamp: string;
+  service: string;
+}
+
+// Extend Express Request interface to include userContext
 declare global {
   namespace Express {
     interface Request {

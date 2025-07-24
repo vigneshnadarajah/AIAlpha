@@ -1,17 +1,24 @@
 import { Router, Request, Response } from 'express';
-import { logger } from '@/utils/logger';
+import { HealthStatus, ApiResponse } from '../types';
 
-const router = Router();
-
-router.get('/', (_req: Request, res: Response): void => {
-  logger.debug('Health check requested');
-  
-  res.json({
-    success: true,
-    message: 'AIAlpha Backend is healthy',
+export const getHealthStatus = (): HealthStatus => {
+  return {
+    status: 'healthy',
     timestamp: new Date().toISOString(),
-    environment: process.env['NODE_ENV'],
-  });
-});
+    service: 'aialpha-backend'
+  };
+};
 
-export { router as healthRouter };
+export const healthRouter = Router();
+
+healthRouter.get('/', (_req: Request, res: Response): void => {
+  const healthStatus = getHealthStatus();
+  
+  const response: ApiResponse<HealthStatus> = {
+    success: true,
+    message: 'Service is healthy',
+    data: healthStatus
+  };
+  
+  res.json(response);
+});

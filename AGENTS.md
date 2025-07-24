@@ -60,13 +60,14 @@ npm test -- --coverage --testPathPattern="feature.test.ts"
 - **Living Documentation:** Tests describe expected behavior
 
 ## Code Style Guidelines
-- **Language:** TypeScript strict mode, Zod validation
-- **Imports:** Absolute paths (@/components), group external/internal/relative
-- **Formatting:** Prettier, 2-space indent, 100 char limit, single quotes
-- **Naming:** camelCase (vars/funcs), PascalCase (components), SCREAMING_SNAKE_CASE (constants)
-- **Types:** Interfaces for objects, avoid `any`, use `unknown`
-- **Error Handling:** Result/Either patterns, proper error boundaries
-- **Testing:** TDD mandatory, 85% coverage, `*.test.ts/.tsx` naming
+- **Language:** TypeScript strict mode, explicit return types required, Zod validation
+- **Imports:** Absolute paths (@/), group external/internal/relative, no unused imports
+- **Formatting:** Prettier (2-space indent, 100 char limit, single quotes, semicolons, trailing commas)
+- **Naming:** camelCase (vars/funcs), PascalCase (components/classes), SCREAMING_SNAKE_CASE (constants)
+- **Types:** Interfaces for objects, explicit function return types, avoid `any` (ESLint error), prefer `unknown`
+- **Error Handling:** Zod validation, custom error classes, proper HTTP status codes, structured ApiResponse
+- **Testing:** TDD mandatory, Jest (backend) + Vitest (frontend), 85% coverage threshold, `*.test.ts/.tsx` naming
+- **Classes:** Use class syntax for controllers/services, arrow functions for methods to preserve `this`
 
 ## Security Requirements
 - **Multi-tenancy:** Schema-per-tenant isolation, qualify all DB queries with `"${tenantSchema}".table`
