@@ -221,7 +221,7 @@ describe('Express App Setup', () => {
     it('should maintain request isolation', async () => {
       app.post('/test-isolation', (req: any, res: any) => {
         res.json({ 
-          timestamp: Date.now(),
+          timestamp: Date.now() + Math.random(),
           body: req.body 
         });
       });
