@@ -39,16 +39,3 @@ export const dataVisualizationSchema = z.object({
   }),
   options: z.record(z.any()).optional()
 });
-
-export const validateSchema = <T extends z.ZodType>(schema: T, data: any): { success: true; data: z.infer<T> } | { success: false; error: z.ZodError } => {
-  const result = schema.safeParse(data);
-  if (result.success) {
-    return { success: true, data: result.data };
-  } else {
-    return { success: false, error: result.error };
-  }
-};
-
-export const formatValidationErrors = (error: z.ZodError): string[] => {
-  return error.issues.map(issue => `${issue.path.join('.')}: ${issue.message}`);
-};
