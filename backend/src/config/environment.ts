@@ -1,3 +1,57 @@
+import { z } from 'zod';
+
+// Zod schemas for environment validation
+const baseEnvironmentSchema = z.object({
+  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+  PORT: z.string().transform(Number).pipe(z.number().min(1).max(65535)).default('3001'),
+  SUPABASE_URL: z.string().url().transform(url => url.endsWith('/') ? url.slice(0, -1) : url), // Remove trailing slash
+  SUPABASE_ANON_KEY: z.string().min(1),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
+  JWT_SECRET: z.string().min(32),
+  FRONTEND_URL: z.string().url().optional().default('http://localhost:5173'),
+  ALLOWED_ORIGINS: z.string().optional().transform(origins => 
+    origins ? origins.split(',').map(origin => origin.trim()) : []
+  ),
+  DB_POOL_SIZE: z.string().transform(Number).pipe(z.number().min(1).max(100)).optional().default('5'),
+  DB_TIMEOUT: z.string().transform(Number).pipe(z.number().min(1000)).optional().default('10000'),
+  LOG_LEVEL: z.enum(['error', 'warn', 'info', 'debug']).optional().default('info'),
+  LOG_FORMAT: z.enum(['json', 'simple']).optional().default('json')
+});
+
+// Environment-specific schema variations
+const developmentSchema = baseEnvironmentSchema.extend({
+  LOG_LEVEL: z.enum(['error', 'warn', 'info', 'debug']).default('debug'),
+  DB_POOL_SIZE: z.string().transform(Number).pipe(z.number().min(1).max(100)).default('3')
+});
+
+const productionSchema = baseEnvironmentSchema.extend({
+  LOG_LEVEL: z.enum(['error', 'warn', 'info', 'debug']).default('warn'),
+  DB_POOL_SIZE: z.string().transform(Number).pipe(z.number().min(1).max(100)).default('10'),
+  FRONTEND_URL: z.string().url() // Required in production
+});
+
+const testSchema = baseEnvironmentSchema.extend({
+  LOG_LEVEL: z.enum(['error', 'warn', 'info', 'debug']).default('error'),
+  DB_POOL_SIZE: z.string().transform(Number).pipe(z.number().min(1).max(100)).default('1')
+});
+
+// Export function to get environment-specific schema
+export const getEnvironmentSchema = (env: string = process.env['NODE_ENV'] || 'development') => {
+  switch (env) {
+    case 'production':
+      return productionSchema;
+    case 'test':
+      return testSchema;
+    case 'development':
+    default:
+      return developmentSchema;
+  }
+};
+
+// Infer TypeScript types from Zod schema
+type BaseEnvironmentConfig = z.infer<typeof baseEnvironmentSchema>;
+
+// Enhanced configuration interface with additional properties
 export interface EnvironmentConfig {
   nodeEnv: string;
   port: number;
@@ -12,44 +66,34 @@ export interface EnvironmentConfig {
   cors: {
     origin: string;
   };
+  allowedOrigins: string[];
+  database: {
+    poolSize: number;
+    timeout: number;
+  };
+  logging: {
+    level: string;
+    format: string;
+  };
 }
 
 let cachedConfig: EnvironmentConfig | null = null;
 
 export const validateEnvironment = (): void => {
-  const requiredVars = [
-    'SUPABASE_URL',
-    'SUPABASE_ANON_KEY', 
-    'SUPABASE_SERVICE_ROLE_KEY',
-    'JWT_SECRET'
-  ];
-
-  for (const varName of requiredVars) {
-    if (!process.env[varName]) {
-      throw new Error(`${varName} is required`);
+  const schema = getEnvironmentSchema();
+  
+  try {
+    schema.parse(process.env);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const validationError = new Error(`Environment validation failed: ${error.issues.map(issue => 
+        `${issue.path.join('.')}: ${issue.message}`
+      ).join(', ')}`);
+      (validationError as any).issues = error.issues;
+      (validationError as any).errors = error.issues;
+      throw validationError;
     }
-  }
-
-  // Validate SUPABASE_URL format
-  const supabaseUrl = process.env['SUPABASE_URL'];
-  if (supabaseUrl) {
-    try {
-      new URL(supabaseUrl);
-    } catch {
-      throw new Error('SUPABASE_URL must be a valid URL');
-    }
-  }
-
-  // Validate PORT if provided
-  const port = process.env['PORT'];
-  if (port && isNaN(Number(port))) {
-    throw new Error('PORT must be a valid number');
-  }
-
-  // Validate JWT_SECRET length
-  const jwtSecret = process.env['JWT_SECRET'];
-  if (jwtSecret && jwtSecret.length < 32) {
-    throw new Error('JWT_SECRET must be at least 32 characters long');
+    throw error;
   }
 };
 
@@ -59,21 +103,45 @@ export const getConfig = (): EnvironmentConfig => {
     return { ...cachedConfig }; // Return a copy to prevent modification
   }
 
-  validateEnvironment();
+  const schema = getEnvironmentSchema();
+  
+  let validatedEnv: BaseEnvironmentConfig;
+  try {
+    validatedEnv = schema.parse(process.env);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const validationError = new Error(`Environment validation failed: ${error.issues.map(issue => 
+        `${issue.path.join('.')}: ${issue.message}`
+      ).join(', ')}`);
+      (validationError as any).issues = error.issues;
+      (validationError as any).errors = error.issues;
+      throw validationError;
+    }
+    throw error;
+  }
 
   const config: EnvironmentConfig = {
-    nodeEnv: process.env['NODE_ENV'] || 'development',
-    port: Number(process.env['PORT']) || 3001,
+    nodeEnv: validatedEnv.NODE_ENV,
+    port: validatedEnv.PORT,
     supabase: {
-      url: process.env['SUPABASE_URL']!,
-      anonKey: process.env['SUPABASE_ANON_KEY']!,
-      serviceRoleKey: process.env['SUPABASE_SERVICE_ROLE_KEY']!
+      url: validatedEnv.SUPABASE_URL,
+      anonKey: validatedEnv.SUPABASE_ANON_KEY,
+      serviceRoleKey: validatedEnv.SUPABASE_SERVICE_ROLE_KEY
     },
     jwt: {
-      secret: process.env['JWT_SECRET']!
+      secret: validatedEnv.JWT_SECRET
     },
     cors: {
-      origin: process.env['FRONTEND_URL'] || 'http://localhost:5173'
+      origin: validatedEnv.FRONTEND_URL || 'http://localhost:5173'
+    },
+    allowedOrigins: validatedEnv.ALLOWED_ORIGINS || [],
+    database: {
+      poolSize: validatedEnv.DB_POOL_SIZE || 5,
+      timeout: validatedEnv.DB_TIMEOUT || 10000
+    },
+    logging: {
+      level: validatedEnv.LOG_LEVEL || 'info',
+      format: validatedEnv.LOG_FORMAT || 'json'
     }
   };
 
