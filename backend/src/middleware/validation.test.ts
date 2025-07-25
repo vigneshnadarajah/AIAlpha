@@ -19,8 +19,8 @@ describe('Validation Middleware', () => {
         email: z.string().email()
       });
 
-      app.post('/test', validateRequest({ body: schema }), (req, res) => {
-        res.json({ success: true, data: req.body });
+      app.post('/test', validateRequest({ body: schema }), (_req, res) => {
+        res.json({ success: true, data: _req.body });
       });
 
       const validData = {
@@ -43,7 +43,7 @@ describe('Validation Middleware', () => {
         email: z.string().email()
       });
 
-      app.post('/test', validateRequest({ body: schema }), (req, res) => {
+      app.post('/test', validateRequest({ body: schema }), (_req, res) => {
         res.json({ success: true });
       });
 
@@ -70,8 +70,8 @@ describe('Validation Middleware', () => {
         limit: z.string().transform(Number).pipe(z.number().max(100))
       });
 
-      app.get('/test', validateRequest({ query: schema }), (req, res) => {
-        res.json({ success: true, query: req.query });
+      app.get('/test', validateRequest({ query: schema }), (_req, res) => {
+        res.json({ success: true, query: _req.query });
       });
 
       const response = await request(app)
@@ -87,8 +87,8 @@ describe('Validation Middleware', () => {
         tenantId: z.string().min(1)
       });
 
-      app.get('/test/:tenantId/:id', validateRequest({ params: schema }), (req, res) => {
-        res.json({ success: true, params: req.params });
+      app.get('/test/:tenantId/:id', validateRequest({ params: schema }), (_req, res) => {
+        res.json({ success: true, params: _req.params });
       });
 
       const validUuid = '123e4567-e89b-12d3-a456-426614174000';
@@ -108,7 +108,7 @@ describe('Validation Middleware', () => {
         array: z.array(z.number().positive()).min(1)
       });
 
-      app.post('/test', validateRequest({ body: schema }), (req, res) => {
+      app.post('/test', validateRequest({ body: schema }), (_req, res) => {
         res.json({ success: true });
       });
 
@@ -144,7 +144,7 @@ describe('Validation Middleware', () => {
         })
       });
 
-      app.post('/test', customMiddleware, (req, res) => {
+      app.post('/test', customMiddleware, (_req, res) => {
         res.json({ success: true });
       });
 
@@ -162,8 +162,8 @@ describe('Validation Middleware', () => {
         tags: z.string().transform(str => str.split(','))
       });
 
-      app.post('/test', validateRequest({ body: schema }), (req, res) => {
-        res.json({ success: true, transformed: req.body });
+      app.post('/test', validateRequest({ body: schema }), (_req, res) => {
+        res.json({ success: true, transformed: _req.body });
       });
 
       const response = await request(app)
@@ -183,8 +183,8 @@ describe('Validation Middleware', () => {
         tenantId: z.string().uuid()
       });
 
-      app.post('/test', validateRequest({ body: schema }), (req, res) => {
-        res.json({ success: true, tenantId: req.body.tenantId });
+      app.post('/test', validateRequest({ body: schema }), (_req, res) => {
+        res.json({ success: true, tenantId: _req.body.tenantId });
       });
 
       const validData = {
@@ -217,8 +217,8 @@ describe('Validation Middleware', () => {
         }))
       };
 
-      app.post('/test', validateRequest({ body: schema }), (req, res) => {
-        res.json({ success: true, count: req.body.items.length });
+      app.post('/test', validateRequest({ body: schema }), (_req, res) => {
+        res.json({ success: true, count: _req.body.items.length });
       });
 
       const startTime = Date.now();
@@ -237,7 +237,7 @@ describe('Validation Middleware', () => {
         name: z.string()
       });
 
-      app.post('/test', validateRequest({ body: schema }), (req, res) => {
+      app.post('/test', validateRequest({ body: schema }), (_req, res) => {
         res.json({ success: true });
       });
 

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z, ZodError } from 'zod';
 
 // User Registration Schema
 export const userRegistrationSchema = z.object({
@@ -39,3 +39,12 @@ export const dataVisualizationSchema = z.object({
   }),
   options: z.record(z.any()).optional()
 });
+
+export const validateSchema = <T>(schema: z.ZodType<T>, data: any): { success: boolean; data?: T; error?: ZodError } => {
+  const result = schema.safeParse(data);
+  if (result.success) {
+    return { success: true, data: result.data };
+  } else {
+    return { success: false, error: result.error };
+  }
+};
