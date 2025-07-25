@@ -45,12 +45,12 @@ export const errorHandler = (
     return;
   }
 
-  // Handle generic errors
-  const response: ApiResponse = {
-    success: false,
-    message: 'Internal server error',
-    statusCode: 500
-  };
-  
-  res.status(500).json(response);
-};
+   // Handle generic errors
+   const response: ApiResponse = {
+     success: false,
+     message: 'Internal server error',
+     statusCode: 500,
+     errors: [error.message]
+   };
+   
+   res.status(500).json(response);};

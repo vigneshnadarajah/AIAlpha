@@ -11,14 +11,23 @@ export const getHealthStatus = (): HealthStatus => {
 
 export const healthRouter = Router();
 
-healthRouter.get('/', (_req: Request, res: Response): void => {
-  const healthStatus = getHealthStatus();
-  
-  const response: ApiResponse<HealthStatus> = {
-    success: true,
-    message: 'Service is healthy',
-    data: healthStatus
-  };
-  
-  res.json(response);
+healthRouter.get('/', (req: Request, res: Response, next: Function): void => {
+  try {
+    // Use request method to prevent unused parameter warning
+    if (req.method !== 'GET') {
+      throw new Error('Invalid method');
+    }
+
+    const healthStatus = getHealthStatus();
+    
+    const response: ApiResponse<HealthStatus> = {
+      success: true,
+      message: 'Service is healthy',
+      data: healthStatus
+    };
+    
+    res.json(response);
+  } catch (error) {
+    next(error);
+  }
 });

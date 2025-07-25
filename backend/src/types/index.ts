@@ -4,6 +4,7 @@ export interface ApiResponse<T = any> {
   data?: T;
   errors?: string[];
   statusCode?: number;
+  validationErrors?: Record<string, string>;
 }
 
 export interface UserContext {
