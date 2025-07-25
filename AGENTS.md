@@ -33,9 +33,10 @@ AIAlpha: Multi-tenant SaaS Data Visualization Platform (React/TypeScript, Node.j
 ### TDD Rules (STRICTLY ENFORCED)
 - **NEVER write implementation before tests**
 - **ALWAYS start with failing test**
-- **Write minimal code to pass tests**
+- **do not comment out tests and do not write mock tests or functions**
 - **Refactor only with green tests**
 - **Achieve 85%+ coverage naturally**
+- **all issues to be raised as git issues and documented in /plans/defects.md**
 
 ### Example TDD Workflow
 ```bash
