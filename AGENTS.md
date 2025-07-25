@@ -36,7 +36,9 @@ AIAlpha: Multi-tenant SaaS Data Visualization Platform (React/TypeScript, Node.j
 - **do not comment out tests and do not write mock tests or functions**
 - **Refactor only with green tests**
 - **Achieve 85%+ coverage naturally**
-- **all issues to be raised as git issues and documented in /plans/defects.md**
+- **ALL defects MUST be raised as GitHub issues immediately upon discovery**
+- **GitHub issues MUST be updated constantly with progress and status changes**
+- **ALL GitHub issues MUST be recorded and synchronized in /plans/defects.md**
 
 ### Example TDD Workflow
 ```bash
@@ -75,9 +77,42 @@ npm test -- --coverage --testPathPattern="feature.test.ts"
 - **Validation:** Zod on all inputs, strict LLM-generated SQL validation
 - **Auth:** Supabase Auth JWT validation in Express middleware
 
+## 🚨 MANDATORY: Defect Management Process
+
+**CRITICAL REQUIREMENTS - NO EXCEPTIONS:**
+
+### Defect Discovery & Tracking
+1. **IMMEDIATE GitHub Issue Creation:** Any defect discovered MUST be raised as a GitHub issue within 5 minutes
+2. **Constant Issue Updates:** GitHub issues MUST be updated with every status change, progress update, or new information
+3. **Synchronized Documentation:** ALL GitHub issues MUST be recorded and kept synchronized in `/plans/defects.md`
+4. **Issue Lifecycle Management:** Track issues from discovery → investigation → resolution → verification → closure
+
+### Required GitHub Issue Commands
+```bash
+# Create new defect issue
+gh issue create --title "🐛 [Component] Brief Description" --body "Detailed description with impact and steps to reproduce" --label "bug,high-priority"
+
+# Update existing issue
+gh issue edit <issue-number> --add-label "in-progress" --body "Updated description with current status"
+
+# List all issues for synchronization
+gh issue list --state all --limit 100
+
+# Close resolved issue
+gh issue close <issue-number> --comment "Resolution details and verification steps"
+```
+
+### Defects.md Synchronization Requirements
+- **Real-time Updates:** Update `/plans/defects.md` immediately after any GitHub issue changes
+- **Complete Traceability:** Every entry must reference corresponding GitHub issue number
+- **Status Alignment:** Defects.md status must match GitHub issue state exactly
+- **Impact Assessment:** Include business impact and technical debt implications
+
 ## Development Quality Gates
+- **Phase Gate 0:** Defect discovery and GitHub issue creation (MANDATORY)
 - **Phase Gate 1:** All tests must pass before proceeding
 - **Phase Gate 2:** 85%+ test coverage required
 - **Phase Gate 3:** TypeScript strict mode compliance
 - **Phase Gate 4:** ESLint and Prettier compliance
 - **Phase Gate 5:** Security validation (tenant isolation, input validation)
+- **Phase Gate 6:** GitHub issues updated and defects.md synchronized
