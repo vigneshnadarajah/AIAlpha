@@ -87,20 +87,21 @@ describe('Environment Configuration', () => {
       expect(typeof config.port).toBe('number');
     });
 
-    //it('should handle different NODE_ENV values', () => {
-    //  // Test that NODE_ENV is read from environment
-    //  process.env['NODE_ENV'] = 'production';
-    //  process.env['SUPABASE_URL'] = 'https://test.supabase.co';
-    //  process.env['SUPABASE_ANON_KEY'] = 'test_anon_key';
-    //  process.env['SUPABASE_SERVICE_ROLE_KEY'] = 'test_service_key';
-    //  process.env['JWT_SECRET'] = validJwtSecret;
+    it('should handle different NODE_ENV values', () => {
+      // Test production environment
+      process.env['NODE_ENV'] = 'production';
+      process.env['SUPABASE_URL'] = 'https://test.supabase.co';
+      process.env['SUPABASE_ANON_KEY'] = 'test_anon_key';
+      process.env['SUPABASE_SERVICE_ROLE_KEY'] = 'test_service_key';
+      process.env['JWT_SECRET'] = validJwtSecret;
 
-    //  const config = getConfig();
-    //  
-    //  // In Jest environment, NODE_ENV might be overridden, so just test that it's a string
-    //  //expect(typeof config.nodeEnv).toBe('string');
-    //  //expect(config.nodeEnv.length).toBeGreaterThan(0);
-    //});
+      // Clear module cache to get fresh config
+      jest.resetModules();
+      const { getConfig: freshGetConfig } = require('./environment');
+      const config = freshGetConfig();
+      
+      expect(config.nodeEnv).toBe('production');
+    });
   });
 
   describe('validateEnvironment Function', () => {
@@ -202,22 +203,25 @@ describe('Environment Configuration', () => {
   });
 
   describe('Environment-specific Configuration', () => {
-    //it('should handle production environment configuration', () => {
-    //  process.env['NODE_ENV'] = 'production';
-    //  process.env['PORT'] = '80';
-    //  process.env['SUPABASE_URL'] = 'https://prod.supabase.co';
-    //  process.env['SUPABASE_ANON_KEY'] = 'prod_anon_key';
-    //  process.env['SUPABASE_SERVICE_ROLE_KEY'] = 'prod_service_key';
-    //  process.env['JWT_SECRET'] = 'production_jwt_secret_with_sufficient_length_32chars';
-    //  process.env['FRONTEND_URL'] = 'https://myapp.com';
+    it('should handle production environment configuration', () => {
+      process.env['NODE_ENV'] = 'production';
+      process.env['PORT'] = '80';
+      process.env['SUPABASE_URL'] = 'https://prod.supabase.co';
+      process.env['SUPABASE_ANON_KEY'] = 'prod_anon_key';
+      process.env['SUPABASE_SERVICE_ROLE_KEY'] = 'prod_service_key';
+      process.env['JWT_SECRET'] = 'production_jwt_secret_with_sufficient_length_32chars';
+      process.env['FRONTEND_URL'] = 'https://myapp.com';
 
-    //  const config = getConfig();
+      // Clear module cache to get fresh config
+      jest.resetModules();
+      const { getConfig: freshGetConfig } = require('./environment');
+      const config = freshGetConfig();
 
-    //  // Test the values we can control (NODE_ENV might be overridden by Jest)
-    //  //expect(config.port).toBe(80);
-    //  expect(config.cors.origin).toBe('https://myapp.com');
-    //  expect(config.supabase.url).toBe('https://prod.supabase.co');
-    //});
+      expect(config.nodeEnv).toBe('production');
+      expect(config.port).toBe(80);
+      expect(config.cors.origin).toBe('https://myapp.com');
+      expect(config.supabase.url).toBe('https://prod.supabase.co');
+    });
 
     it('should handle development environment configuration', () => {
       process.env['NODE_ENV'] = 'development';
